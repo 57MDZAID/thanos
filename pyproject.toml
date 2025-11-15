@@ -4,10 +4,10 @@ version = "0.1.0"
 description = "🫰 Thanos - Eliminate half of all files with a snap. Perfectly balanced, as all things should be."
 readme = "README.md"
 authors = [
-  {name = "Soldatov Serhii", email = "soldatov.own@gmail.com"}
+    { name = "Soldatov Serhii", email = "soldatov.own@gmail.com" }
 ]
 maintainers = [
-  {name = "Soldatov Serhii", email = "soldatov.own@gmail.com"}
+    { name = "Soldatov Serhii", email = "soldatov.own@gmail.com" }
 ]
 classifiers = [
     "Development Status :: 4 - Beta",
@@ -25,18 +25,18 @@ classifiers = [
     "Topic :: Utilities",
     "Typing :: Typed",
 ]
-license = {text = "MIT"}
+license = { text = "MIT" }
 dependencies = [
-  "typer"
+    "typer"
 ]
 requires-python = ">= 3.9"
 keywords = ["cli", "files", "cleanup", "utility", "thanos"]
 
 [project.optional-dependencies]
 test = [
-    "coverage",  # testing
-    "pytest",  # testing
-    "ruff",  # linting
+    "coverage", # testing
+    "pytest", # testing
+    "ruff", # linting
     "ty", # checking types
     "ipdb", # debugging
 ]
@@ -50,6 +50,10 @@ documentation = "https://github.com/soldatov-ss/thanos/blob/master/docs/usage.md
 [project.scripts]
 thanos = "thanos.cli:app"
 
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
 [tool.ty]
 # All rules are enabled as "error" by default; no need to specify unless overriding.
 # Example override: relax a rule for the entire project (uncomment if needed).
@@ -60,12 +64,26 @@ line-length = 120
 
 [tool.ruff.lint]
 select = [
-    "E",   # pycodestyle errors
-    "W",   # pycodestyle warnings
-    "F",   # Pyflakes
-    "I",   # isort
-    "B",   # flake8-bugbear
-    "UP",  # pyupgrade
+    "E", # pycodestyle errors
+    "W", # pycodestyle warnings
+    "F", # Pyflakes
+    "I", # isort
+    "B", # flake8-bugbear
+    "UP", # pyupgrade
+]
+
+[tool.coverage.run]
+source = ["thanos"]
+omit = ["tests/*"]
+
+[tool.coverage.report]
+exclude_lines = [
+    "pragma: no cover",
+    "def __repr__",
+    "raise AssertionError",
+    "raise NotImplementedError",
+    "if __name__ == .__main__.:",
+    "if TYPE_CHECKING:",
 ]
 
 [tool.uv]
