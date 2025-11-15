@@ -1,9 +1,11 @@
 """Console script for thanos."""
 
+import argparse
+import random
+
 import typer
 from rich.console import Console
-import random
-import argparse
+
 from thanos.utils import get_files
 
 app = typer.Typer()
