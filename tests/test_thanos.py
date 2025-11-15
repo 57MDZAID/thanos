@@ -239,7 +239,7 @@ class TestMain:
                 (temp_dir / f"file_{i}.txt").write_text(f"Content {i}")
 
             with patch("sys.argv", ["thanos", "--dry-run"]):
-                result = main
+                result = main()
 
             assert result == 0
             captured = capsys.readouterr()
