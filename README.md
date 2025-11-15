@@ -28,6 +28,7 @@ A Python CLI tool that randomly eliminates half of the files in a directory with
 
 ```bash
 uv add thanos-cli
+uv pip install thanos-cli   # <- if you don't have pyproject.toml
 ```
 
 ### Using pip
