@@ -1,8 +1,7 @@
 from pathlib import Path
-from typing import List
 
 
-def get_files(directory: str, recursive: bool = False) -> List[Path]:
+def get_files(directory: str, recursive: bool = False) -> list[Path]:
     """Get all files in the directory."""
     path = Path(directory)
 

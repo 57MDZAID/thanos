@@ -1,13 +1,14 @@
 #!/usr/bin/env python
 
 import os
-import pytest
-import tempfile
 import shutil
+import tempfile
 from pathlib import Path
 from unittest.mock import patch
-import thanos
-from thanos.cli import snap, main
+
+import pytest
+
+from thanos.cli import main, snap
 from thanos.utils import get_files
 
 
@@ -164,7 +165,6 @@ class TestSnap:
 
     def test_snap_recursive(self, nested_dir):
         """Test snap in recursive mode."""
-        initial_count = len(list(nested_dir.rglob("*")))
         initial_files = len([f for f in nested_dir.rglob("*") if f.is_file()])
 
         with patch("builtins.input", return_value="snap"):
