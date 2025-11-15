@@ -39,10 +39,7 @@ jobs:
           uv run ruff check --select=E9,F63,F7,F82
           uv run ruff check --exit-zero --statistics
 
-      - name: Run tests with pytest
-        run: uv run pytest
-
-      - name: Run tests with coverage (optional)
+      - name: Run tests with coverage
         run: |
           uv run coverage run -m pytest
           uv run coverage report
