@@ -41,5 +41,13 @@ jobs:
 
       - name: Run tests with coverage
         run: |
-          uv run coverage run -m pytest -s
+          uv run coverage run -m pytest
           uv run coverage report
+          uv run coverage xml
+
+      - name: Upload coverage to Coveralls
+        uses: coverallsapp/github-action@v2.3.0
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+        env:
+          COVERALLS_REPO_TOKEN: ${{ secrets.COVERALLS_REPO_TOKEN }}
