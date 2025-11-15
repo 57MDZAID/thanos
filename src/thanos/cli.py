@@ -1,14 +1,18 @@
 """Console script for thanos."""
 
-import argparse
 import random
+from typing import Annotated, Optional
 
 import typer
 from rich.console import Console
 
 from thanos.utils import get_files
 
-app = typer.Typer()
+app = typer.Typer(
+    name="thanos",
+    help="🫰 Thanos - Eliminate half of all files with a snap. Perfectly balanced, as all things should be.",
+    add_completion=False,
+)
 console = Console()
 
 
@@ -74,23 +78,43 @@ def snap(directory: str = ".", recursive: bool = False, dry_run: bool = False):
 
 
 @app.command()
-def main():
-    """CLI entry point."""
-    parser = argparse.ArgumentParser(
-        description="Thanos - Eliminate half of all files with a snap",
-        epilog="⚠️  Use with caution. Deleted files cannot be recovered.",
-    )
+def main(
+    directory: Annotated[
+        Optional[str],
+        typer.Argument(
+            help="Target directory to snap (default: current directory)",
+            show_default=False,
+        ),
+    ] = ".",
+    recursive: Annotated[
+        bool, typer.Option("--recursive", "-r", help="Include files in subdirectories recursively")
+    ] = False,
+    dry_run: Annotated[
+        bool, typer.Option("--dry-run", "-d", help="Preview what would be deleted without actually deleting")
+    ] = False,
+):
+    """
+    🫰 Eliminate half of all files in a directory with a snap.
 
-    parser.add_argument("directory", nargs="?", default=".", help="Target directory (default: current directory)")
+    Thanos randomly selects and deletes exactly half of the files in the specified
+    directory. Use with caution - deleted files cannot be recovered!
 
-    parser.add_argument("-r", "--recursive", action="store_true", help="Include files in subdirectories")
+    Examples:
 
-    parser.add_argument("-d", "--dry-run", action="store_true", help="Show what would be deleted without deleting")
+        # Snap current directory (dry run first!)
+        $ thanos --dry-run
 
-    args = parser.parse_args()
+        # Snap a specific directory
+        $ thanos /path/to/directory
 
+        # Include subdirectories recursively
+        $ thanos --recursive
+
+        # Snap a directory and its subdirectories
+        $ thanos /path/to/directory --recursive
+    """
     try:
-        snap(args.directory, args.recursive, args.dry_run)
+        snap(directory, recursive, dry_run)
     except Exception as e:
         print(f"❌ Error: {e}")
         return 1
