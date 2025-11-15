@@ -2,20 +2,98 @@
 
 import typer
 from rich.console import Console
-
-from thanos import utils
+import random
+import argparse
+from thanos.utils import get_files
 
 app = typer.Typer()
 console = Console()
 
 
+def snap(directory: str = ".", recursive: bool = False, dry_run: bool = False):
+    """
+    The Snap - Eliminates half of all files randomly.
+
+    Args:
+        directory: Target directory (default: current directory)
+        recursive: Include subdirectories
+        dry_run: Show what would be deleted without actually deleting
+    """
+    print("🫰 Initiating the Snap...")
+
+    files = get_files(directory, recursive)
+    total_files = len(files)
+
+    if total_files == 0:
+        print("No files found. The universe is empty.")
+        return
+
+    # Calculate how many files to eliminate
+    files_to_eliminate = total_files // 2
+
+    # Randomly select files for elimination
+    eliminated = random.sample(files, files_to_eliminate)
+
+    print("\n📊 Balance Assessment:")
+    print(f"   Total files: {total_files}")
+    print(f"   Files to eliminate: {files_to_eliminate}")
+    print(f"   Survivors: {total_files - files_to_eliminate}")
+
+    if dry_run:
+        print("\n🔍 DRY RUN - These files would be eliminated:")
+        for file in eliminated:
+            print(f"   💀 {file}")
+        print("\n⚠️  This was a dry run. No files were harmed.")
+        return
+
+    # Confirm before destruction
+    print("\n⚠️  WARNING: This will permanently delete files!")
+    confirm = input("Type 'snap' to proceed: ")
+
+    if confirm.lower() != "snap":
+        print("Snap cancelled. The universe remains unchanged.")
+        return
+
+    # Execute the snap
+    print("\n💥 Snapping...")
+    eliminated_count = 0
+
+    for file in eliminated:
+        try:
+            file.unlink()
+            eliminated_count += 1
+            print(f"   💀 {file}")
+        except Exception as e:
+            print(f"   ❌ Failed to eliminate {file}: {e}")
+
+    print("\n✨ The snap is complete.")
+    print(f"   {eliminated_count} files eliminated.")
+    print("   Perfectly balanced, as all things should be.")
+
+
 @app.command()
 def main():
-    """Console script for thanos."""
-    console.print("Replace this message by putting your code into "
-               "thanos.cli.main")
-    console.print("See Typer documentation at https://typer.tiangolo.com/")
-    utils.do_something_useful()
+    """CLI entry point."""
+    parser = argparse.ArgumentParser(
+        description="Thanos - Eliminate half of all files with a snap",
+        epilog="⚠️  Use with caution. Deleted files cannot be recovered.",
+    )
+
+    parser.add_argument("directory", nargs="?", default=".", help="Target directory (default: current directory)")
+
+    parser.add_argument("-r", "--recursive", action="store_true", help="Include files in subdirectories")
+
+    parser.add_argument("-d", "--dry-run", action="store_true", help="Show what would be deleted without deleting")
+
+    args = parser.parse_args()
+
+    try:
+        snap(args.directory, args.recursive, args.dry_run)
+    except Exception as e:
+        print(f"❌ Error: {e}")
+        return 1
+
+    return 0
 
 
 if __name__ == "__main__":
