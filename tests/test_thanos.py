@@ -8,8 +8,9 @@ from unittest.mock import patch
 
 import pytest
 
-from thanos.cli import main, snap
-from thanos.utils import get_files
+
+from thanos_cli.cli import main, snap
+from thanos_cli.utils import get_files
 
 
 @pytest.fixture

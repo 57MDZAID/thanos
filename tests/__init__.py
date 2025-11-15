@@ -1,1 +1,1 @@
-"""Unit test package for thanos."""
+"""Unit test package for thanos_cli."""

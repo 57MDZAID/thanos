@@ -1,4 +1,4 @@
-# Justfile for thanos
+# Justfile for thanos_cli
 
 # Show available commands
 list:

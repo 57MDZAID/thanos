@@ -1,4 +1,4 @@
-"""Console script for thanos."""
+"""Console script for thanos_cli."""
 
 import random
 from typing import Annotated, Optional
@@ -6,7 +6,7 @@ from typing import Annotated, Optional
 import typer
 from rich.console import Console
 
-from thanos.utils import get_files
+from .utils import get_files
 
 app = typer.Typer(
     name="thanos",

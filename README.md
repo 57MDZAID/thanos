@@ -27,13 +27,13 @@ A Python CLI tool that randomly eliminates half of the files in a directory with
 ### Using uv (recommended)
 
 ```bash
-uv add thanos
+uv add thanos-cli
 ```
 
 ### Using pip
 
 ```bash
-pip install thanos
+pip install thanos-cli
 ```
 
 

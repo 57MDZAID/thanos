@@ -1,5 +1,5 @@
 [project]
-name = "thanos"
+name = "thanos-cli"
 version = "0.1.0"
 description = "🫰 Thanos - Eliminate half of all files with a snap. Perfectly balanced, as all things should be."
 readme = "README.md"
@@ -34,11 +34,11 @@ keywords = ["cli", "files", "cleanup", "utility", "thanos"]
 
 [project.optional-dependencies]
 test = [
-    "coverage", # testing
-    "pytest", # testing
-    "ruff", # linting
-    "ty", # checking types
-    "ipdb", # debugging
+    "coverage",
+    "pytest",
+    "ruff",
+    "ty",
+    "ipdb",
 ]
 
 [project.urls]
@@ -48,11 +48,15 @@ changelog = "https://github.com/soldatov-ss/thanos/blob/master/CHANGELOG.md"
 documentation = "https://github.com/soldatov-ss/thanos/blob/master/docs/usage.md"
 
 [project.scripts]
-thanos = "thanos.cli:app"
+thanos = "thanos_cli.cli:app"
 
 [build-system]
 requires = ["hatchling"]
 build-backend = "hatchling.build"
+
+# Important: Tell Hatch where the package lives
+[tool.hatch.build.targets.wheel]
+packages = ["src/thanos_cli"]
 
 [tool.ty]
 # All rules are enabled as "error" by default; no need to specify unless overriding.
@@ -73,7 +77,7 @@ select = [
 ]
 
 [tool.coverage.run]
-source = ["thanos"]
+source = ["thanos_cli"]
 omit = ["tests/*"]
 
 [tool.coverage.report]

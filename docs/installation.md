@@ -5,13 +5,13 @@
 To install thanos, run this command in your terminal:
 
 ```sh
-uv add thanos
+uv add thanos-cli
 ```
 
 Or if you prefer to use `pip`:
 
 ```sh
-pip install thanos
+pip install thanos-cli
 ```
 
 ## From source
