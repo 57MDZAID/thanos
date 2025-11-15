@@ -1,7 +1,7 @@
 [project]
 name = "thanos"
 version = "0.1.0"
-description = "Python Boilerplate contains all the boilerplate you need to create a Python package."
+description = "🫰 Thanos - Eliminate half of all files with a snap. Perfectly balanced, as all things should be."
 readme = "README.md"
 authors = [
   {name = "Soldatov Serhii", email = "soldatov.own@gmail.com"}
