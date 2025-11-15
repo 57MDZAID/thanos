@@ -204,8 +204,7 @@ class TestMain:
 
     def test_main_with_dry_run(self, populated_dir, capsys):
         """Test main function with dry-run argument."""
-        with patch("sys.argv", ["thanos", str(populated_dir), "--dry-run"]):
-            result = main()
+        result = main(str(populated_dir), dry_run=True)
 
         assert result == 0
         captured = capsys.readouterr()
@@ -213,15 +212,12 @@ class TestMain:
 
     def test_main_with_recursive(self, nested_dir):
         """Test main function with recursive argument."""
-        with patch("sys.argv", ["thanos", str(nested_dir), "-r", "-d"]):
-            result = main()
-
+        result = main(str(nested_dir), recursive=True, dry_run=True)
         assert result == 0
 
     def test_main_with_nonexistent_dir(self, capsys):
         """Test main function with nonexistent directory."""
-        with patch("sys.argv", ["thanos", "/fake/directory"]):
-            result = main()
+        result = main("/fake/directory")
 
         assert result == 1
         captured = capsys.readouterr()
@@ -238,14 +234,14 @@ class TestMain:
             for i in range(4):
                 (temp_dir / f"file_{i}.txt").write_text(f"Content {i}")
 
-            with patch("sys.argv", ["thanos", "--dry-run"]):
-                result = main()
+            result = main(dry_run=True)
 
             assert result == 0
             captured = capsys.readouterr()
             assert "Total files: 4" in captured.out
         finally:
             os.chdir(original_dir)
+
 
 
 class TestEdgeCases:
