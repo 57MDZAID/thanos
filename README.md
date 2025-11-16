@@ -2,6 +2,10 @@
 
 > *"Perfectly balanced, as all things should be."*
 
+<p align="center">
+  <img src="docs/glove.png" width="120" alt="A glove"/>
+</p>
+
 A Python CLI tool that randomly eliminates half of the files in a directory with a snap. Inspired by Marvel's Thanos and his infamous snap.
 
 [![Test Python application](https://github.com/soldatov-ss/thanos/actions/workflows/test.yml/badge.svg)](https://github.com/soldatov-ss/thanos/actions/workflows/test.yml)
