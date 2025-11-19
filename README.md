@@ -23,8 +23,6 @@ A Python CLI tool that randomly eliminates half of the files in a directory with
 - 🔒 **Safety First**: Requires confirmation before deletion
 - 👁️ **Dry Run Mode**: Preview what would be deleted without actually deleting
 - 📁 **Recursive Support**: Optionally include files in subdirectories
-- 🎨 **Beautiful CLI**: Colorful output with emojis and clear status messages
-- 🧪 **Well Tested**: Comprehensive test suite with pytest
 
 ## 📦 Installation
 
@@ -59,6 +57,9 @@ thanos --recursive
 
 # Dry run on a specific directory with subdirectories
 thanos /path/to/directory --recursive --dry-run
+
+# Dry run with deterministic output
+thanos --dry-run --seed 42
 ```
 
 ## 📖 Usage
@@ -75,6 +76,7 @@ thanos [OPTIONS] [DIRECTORY]
 
 - `-r, --recursive` - Include files in subdirectories recursively
 - `-d, --dry-run` - Preview what would be deleted without actually deleting
+- `-s, --seed <INTEGER>` - Use a random seed for reproducible file selection
 - `--help` - Show help message and exit
 
 ### Examples

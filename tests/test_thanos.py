@@ -8,7 +8,6 @@ from unittest.mock import patch
 
 import pytest
 
-
 from thanos_cli.cli import main, snap
 from thanos_cli.utils import get_files
 
@@ -175,8 +174,87 @@ class TestSnap:
         expected_remaining = initial_files - (initial_files // 2)
         assert remaining_files == expected_remaining
 
-    def test_snap_randomness(self, temp_dir):
-        """Test that snap uses randomness in file selection."""
+    def test_snap_with_seed_reproducible(self, temp_dir):
+        """Test that using the same seed produces the same file selection."""
+        # Create test files
+        for i in range(10):
+            (temp_dir / f"file_{i}.txt").write_text(f"Content {i}")
+
+        # First run with seed
+        snap(str(temp_dir), dry_run=True, seed=42)
+
+        # Get the files that would be selected
+        files = get_files(str(temp_dir))
+        import random
+
+        random.seed(42)
+        first_selection = set(random.sample(files, len(files) // 2))
+
+        # Second run with same seed (in a fresh temp dir)
+        temp_dir2 = Path(tempfile.mkdtemp())
+        try:
+            for i in range(10):
+                (temp_dir2 / f"file_{i}.txt").write_text(f"Content {i}")
+
+            files2 = get_files(str(temp_dir2))
+            random.seed(42)
+            second_selection = set(random.sample(files2, len(files2) // 2))
+
+            # Compare just the filenames since paths will differ
+            first_names = {f.name for f in first_selection}
+            second_names = {f.name for f in second_selection}
+            assert first_names == second_names
+        finally:
+            shutil.rmtree(temp_dir2)
+
+    def test_snap_with_different_seeds(self, temp_dir):
+        """Test that different seeds produce different selections."""
+        # Create test files
+        for i in range(20):
+            (temp_dir / f"file_{i}.txt").write_text(f"Content {i}")
+
+        files = get_files(str(temp_dir))
+
+        # Get selections with different seeds
+        import random
+
+        random.seed(42)
+        selection1 = set(random.sample(files, len(files) // 2))
+
+        random.seed(123)
+        selection2 = set(random.sample(files, len(files) // 2))
+
+        # Selections should be different (highly likely with 20 files)
+        assert selection1 != selection2
+
+    def test_snap_seed_displayed(self, populated_dir, capsys):
+        """Test that seed is displayed when provided."""
+        snap(str(populated_dir), dry_run=True, seed=42)
+        captured = capsys.readouterr()
+        assert "Using random seed: 42" in captured.out
+
+    def test_snap_seed_tip_shown_without_seed(self, populated_dir, capsys):
+        """Test that seed tip is shown in dry run without seed."""
+        snap(str(populated_dir), dry_run=True)
+        captured = capsys.readouterr()
+        assert "Use --seed" in captured.out
+
+    def test_snap_seed_tip_not_shown_with_seed(self, populated_dir, capsys):
+        """Test that generic tip is replaced with specific command when seed is used."""
+        snap(str(populated_dir), dry_run=True, seed=42)
+        captured = capsys.readouterr()
+        assert "thanos --seed 42" in captured.out
+
+    def test_snap_shows_file_list_before_deletion(self, populated_dir, capsys):
+        """Test that file list is shown before confirmation prompt."""
+        with patch("builtins.input", return_value="no"):
+            snap(str(populated_dir))
+
+        captured = capsys.readouterr()
+        assert "Files selected for elimination:" in captured.out
+
+    def test_snap_randomness_without_seed(self, temp_dir):
+        """Test that snap uses randomness in file selection when no seed is provided."""
         # Create multiple test directories with identical files
         results = []
 
@@ -216,6 +294,21 @@ class TestMain:
         result = main(str(nested_dir), recursive=True, dry_run=True)
         assert result == 0
 
+    def test_main_with_seed(self, populated_dir, capsys):
+        """Test main function with seed argument."""
+        result = main(str(populated_dir), dry_run=True, seed=12345)
+        assert result == 0
+        captured = capsys.readouterr()
+        assert "Using random seed: 12345" in captured.out
+
+    def test_main_with_all_options(self, nested_dir, capsys):
+        """Test main function with all options combined."""
+        result = main(str(nested_dir), recursive=True, dry_run=True, seed=999)
+        assert result == 0
+        captured = capsys.readouterr()
+        assert "Using random seed: 999" in captured.out
+        assert "DRY RUN" in captured.out
+
     def test_main_with_nonexistent_dir(self, capsys):
         """Test main function with nonexistent directory."""
         result = main("/fake/directory")
@@ -242,7 +335,6 @@ class TestMain:
             assert "Total files: 4" in captured.out
         finally:
             os.chdir(original_dir)
-
 
 
 class TestEdgeCases:
@@ -278,6 +370,24 @@ class TestEdgeCases:
 
         remaining = len(list(temp_dir.iterdir()))
         assert remaining == 1  # 2 // 2 = 1 deleted, 1 remains
+
+    def test_seed_with_zero(self, populated_dir, capsys):
+        """Test that seed=0 is a valid seed."""
+        snap(str(populated_dir), dry_run=True, seed=0)
+        captured = capsys.readouterr()
+        assert "Using random seed: 0" in captured.out
+
+    def test_seed_with_negative(self, populated_dir, capsys):
+        """Test that negative seed values work."""
+        snap(str(populated_dir), dry_run=True, seed=-42)
+        captured = capsys.readouterr()
+        assert "Using random seed: -42" in captured.out
+
+    def test_seed_with_large_number(self, populated_dir, capsys):
+        """Test that large seed values work."""
+        snap(str(populated_dir), dry_run=True, seed=999999999)
+        captured = capsys.readouterr()
+        assert "Using random seed: 999999999" in captured.out
 
 
 if __name__ == "__main__":

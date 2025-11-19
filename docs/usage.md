@@ -42,6 +42,18 @@ thanos --dry-run
 thanos /path/to/directory --dry-run
 ```
 
+### Deterministic Preview Using --seed
+
+Use `--seed` to get reproducible file selections:
+
+```bash
+# Same preview every time
+thanos --dry-run --seed 42
+
+# Use same seed again to delete the exact same files
+thanos --seed 42
+```
+
 ## Command Options
 
 ### Directory Argument
@@ -116,10 +128,10 @@ thanos /path/to/dir --dry-run --recursive
 ls -la test-data/
 
 # 2. See what would be deleted
-thanos test-data/ --dry-run
+thanos test-data/ --dry-run --seed 99   # preview reproducibly
 
 # 3. Proceed with deletion
-thanos test-data/
+thanos test-data/ --seed 99            # delete same selection
 # Type 'snap' when prompted
 ```
 
@@ -127,10 +139,10 @@ thanos test-data/
 
 ```bash
 # Preview deletion including subdirectories
-thanos ~/Downloads --recursive --dry-run
+thanos ~/Downloads --recursive --dry-run --seed 150
 
 # If satisfied, proceed
-thanos ~/Downloads --recursive
+thanos ~/Downloads --recursive --seed 150
 ```
 
 ### Scenario 3: Cleaning Temporary Files
@@ -150,8 +162,8 @@ cd test-snap
 for i in {1..20}; do echo "test $i" > file$i.txt; done
 
 # Test the snap
-thanos --dry-run
-thanos
+thanos --dry-run --seed 150
+thanos --seed 150
 ```
 
 ## Safety Guidelines
@@ -213,8 +225,8 @@ thanos ~/specific-folder
 
 ```bash
 # Dry run with recursive
-thanos /data --recursive --dry-run
-thanos /data -r -d
+thanos /data --recursive --dry-run --seed 123
+thanos /data -r -d --seed 123
 
 # Real snap with recursive (requires confirmation)
 thanos /data --recursive
@@ -367,6 +379,7 @@ thanos /directory --recursive
 
 1. **Always dry run first**: `thanos --dry-run`
 2. **Start with small, safe directories**: Test on `/tmp` first
+3. **Use `--seed` when you want predictable behavior**
 3. **Know your file count**: Check with `ls | wc -l`
 4. **Backup important data**: Better safe than sorry
 5. **Read the confirmation prompt**: Make sure you're in the right directory

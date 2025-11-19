@@ -16,7 +16,12 @@ app = typer.Typer(
 console = Console()
 
 
-def snap(directory: str = ".", recursive: bool = False, dry_run: bool = False):
+def snap(
+    directory: str = ".",
+    recursive: bool = False,
+    dry_run: bool = False,
+    seed: Optional[int] = None,
+):
     """
     The Snap - Eliminates half of all files randomly.
 
@@ -24,8 +29,14 @@ def snap(directory: str = ".", recursive: bool = False, dry_run: bool = False):
         directory: Target directory (default: current directory)
         recursive: Include subdirectories
         dry_run: Show what would be deleted without actually deleting
+        seed: Random seed for reproducible file selection
     """
     print("🫰 Initiating the Snap...")
+
+    # Set random seed if provided for reproducible results
+    if seed is not None:
+        random.seed(seed)
+        print(f"🎲 Using random seed: {seed}")
 
     files = get_files(directory, recursive)
     total_files = len(files)
@@ -50,10 +61,19 @@ def snap(directory: str = ".", recursive: bool = False, dry_run: bool = False):
         for file in eliminated:
             print(f"   💀 {file}")
         print("\n⚠️  This was a dry run. No files were harmed.")
+        if seed is None:
+            print("💡 Tip: Use --seed <number> to get the same file selection on the next run.")
+        else:
+            print(f"💡 Run 'thanos --seed {seed}' to delete these exact files.")
         return
 
+    # Show preview of files to be deleted
+    print("\n📋 Files selected for elimination:")
+    for file in eliminated:
+        print(f"   💀 {file}")
+
     # Confirm before destruction
-    print("\n⚠️  WARNING: This will permanently delete files!")
+    print("\n⚠️  WARNING: This will permanently delete the files listed above!")
     confirm = input("Type 'snap' to proceed: ")
 
     if confirm.lower() != "snap":
@@ -68,7 +88,7 @@ def snap(directory: str = ".", recursive: bool = False, dry_run: bool = False):
         try:
             file.unlink()
             eliminated_count += 1
-            print(f"   💀 {file}")
+            print(f"   ✓ Eliminated: {file}")
         except Exception as e:
             print(f"   ❌ Failed to eliminate {file}: {e}")
 
@@ -87,11 +107,29 @@ def main(
         ),
     ] = ".",
     recursive: Annotated[
-        bool, typer.Option("--recursive", "-r", help="Include files in subdirectories recursively")
+        bool,
+        typer.Option(
+            "--recursive",
+            "-r",
+            help="Include files in subdirectories recursively",
+        ),
     ] = False,
     dry_run: Annotated[
-        bool, typer.Option("--dry-run", "-d", help="Preview what would be deleted without actually deleting")
+        bool,
+        typer.Option(
+            "--dry-run",
+            "-d",
+            help="Preview what would be deleted without actually deleting",
+        ),
     ] = False,
+    seed: Annotated[
+        Optional[int],
+        typer.Option(
+            "--seed",
+            "-s",
+            help="Random seed for reproducible file selection (use same seed to get same files)",
+        ),
+    ] = None,
 ):
     """
     🫰 Eliminate half of all files in a directory with a snap.
@@ -99,22 +137,28 @@ def main(
     Thanos randomly selects and deletes exactly half of the files in the specified
     directory. Use with caution - deleted files cannot be recovered!
 
+    The file selection is random by default. Use --seed with the same number to get
+    the same selection across runs.
+
     Examples:
 
-        # Snap current directory (dry run first!)
+        # Preview with a random selection
         $ thanos --dry-run
 
+        # Preview with a specific seed (reproducible)
+        $ thanos --dry-run --seed 12345
+
+        # Delete using the same seed from dry run
+        $ thanos --seed 12345
+
         # Snap a specific directory
-        $ thanos /path/to/directory
+        $ thanos /path/to/directory --seed 999
 
-        # Include subdirectories recursively
-        $ thanos --recursive
-
-        # Snap a directory and its subdirectories
-        $ thanos /path/to/directory --recursive
+        # Include subdirectories with seed
+        $ thanos --recursive --seed 42
     """
     try:
-        snap(directory, recursive, dry_run)
+        snap(directory, recursive, dry_run, seed)
     except Exception as e:
         print(f"❌ Error: {e}")
         return 1
