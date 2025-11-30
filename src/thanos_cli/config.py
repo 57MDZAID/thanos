@@ -8,7 +8,7 @@ def get_default_protected_patterns() -> set[str]:
     return {
         # Version control (The history of the universe must be preserved)
         ".git",
-        ".git/**",
+        ".git/",
         ".gitignore",
         ".gitattributes",
         ".svn",
@@ -45,8 +45,8 @@ def get_default_protected_patterns() -> set[str]:
         ".thanosignore",
         ".thanosrc.json",
         # IDEs (Debatable, but usually annoying to lose)
-        ".vscode/**",
-        ".idea/**",
+        ".vscode/",
+        ".idea/",
         # Database files
         "*.db",
         "*.sqlite",
