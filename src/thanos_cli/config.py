@@ -14,26 +14,23 @@ def get_default_protected_patterns() -> set[str]:
         ".svn",
         ".hg",
         # --- THE HEAVYWEIGHTS (Prevent Statistical Skew) ---
-        # Python
-        ".venv/**",
-        "venv/**",
-        "env/**",
-        ".env_dir",
-        "__pycache__",
-        "__pycache__/**",  # Bytecode is regenerative, but noisy to delete
-        ".pytest_cache",
-        ".mypy_cache",
-        # JavaScript / Node
-        "node_modules",
-        "node_modules/**",
-        # Compiled/Build Artifacts (Optional, but recommended)
-        "dist/**",
-        "build/**",
-        "target/**",  # Rust/Java
+        # Python virtual environments
+        "venv/",
+        ".venv/",
+        "env/",
+        ".env.local/",
+        "__pycache__/",
+        "*.pyc",
+        "*.pyo",
+        # Node.js
+        "node_modules/",
         # --- CRITICAL CONFIGURATION ---
-        # Environment variables
+        # Environment and config files
         ".env",
         ".env.*",
+        "*.config",
+        "config.yml",
+        "config.yaml",
         # Lock files (Keep these safe to ensure reproducibility after the snap)
         "package-lock.json",
         "yarn.lock",
@@ -47,7 +44,6 @@ def get_default_protected_patterns() -> set[str]:
         # Thanos shouldn't snap himself
         ".thanosignore",
         ".thanosrc.json",
-        "thanos.py",
         # IDEs (Debatable, but usually annoying to lose)
         ".vscode/**",
         ".idea/**",

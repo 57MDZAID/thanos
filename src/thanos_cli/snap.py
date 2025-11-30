@@ -40,16 +40,17 @@ def snap(
 
     # Load protection patterns
     protected_patterns = set()
-    if not no_protect:
-        protected_patterns.update(get_default_protected_patterns())
-        console.print("🛡️  [green]Default protections enabled[/green]")
 
+    if not no_protect:
         ignore_patterns, ignore_file_path = load_thanosignore(directory)
         if ignore_patterns:
             protected_patterns.update(ignore_patterns)
             console.print(
                 f"📋 [green]Loaded {len(ignore_patterns)} patterns from [bold]{ignore_file_path}[/bold][/green]"
             )
+        else:
+            protected_patterns.update(get_default_protected_patterns())
+            console.print("🛡️  [green]Default protections enabled[/green]")
     else:
         console.print("⚠️  [bold red]WARNING: All file protections disabled![/bold red]")
 

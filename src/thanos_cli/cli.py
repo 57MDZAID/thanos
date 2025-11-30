@@ -98,33 +98,38 @@ def init(
     thanosignore_path = base_path / ".thanosignore"
     if not thanosignore_path.exists():
         thanosignore_content = """# Thanos Ignore File
-# Patterns listed here will be protected from elimination
+# Uses gitignore-style pattern matching
+# https://git-scm.com/docs/gitignore
 
-# The Black Hole Prevention
-# (Large folders that usually absorb all damage if not ignored)
-node_modules/**
-venv/**
-.venv/**
-__pycache__/**
+# Important directories (trailing slash matches directories)
+important/
+backup/
+docs/
 
-# Important directories
-important/**
-backup/**
-docs/**
+# Python
+venv/
+.venv/
+__pycache__/
+*.pyc
+
+# Node.js
+node_modules/
 
 # Database files
 *.db
 *.sqlite
 
-# System & Config
-.env
-.git/**
-.vscode/**
-.idea/**
-
-# Important data files
+# Important data files (wildcards work like gitignore)
 *-important.*
 *-backup.*
+
+# Specific files
+secrets.json
+credentials.yaml
+
+# Thanos shouldn't snap himself
+.thanosignore
+.thanosrc.json
 """
         thanosignore_path.write_text(thanosignore_content)
         console.print(f"[green]✓[/green] Created [bold]{thanosignore_path}[/bold]")
@@ -159,8 +164,8 @@ docs/**
         Panel(
             "[bold green]✨ Initialization complete![/bold green]\n\n"
             "Edit these files to customize:\n"
-            f"  • [cyan]{thanosignore_path}[/cyan]\n"
-            f"  • [cyan]{thanosrc_path}[/cyan]\n\n"
+            f"  • [cyan]{thanosignore_path}[/cyan] - Uses gitignore-style patterns\n"
+            f"  • [cyan]{thanosrc_path}[/cyan] - Configure weighted selection\n\n"
             "[dim]Run 'thanos snap -d' to test your configuration.[/dim]",
             border_style="green",
         )

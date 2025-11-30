@@ -27,7 +27,8 @@ classifiers = [
 ]
 license = { text = "MIT" }
 dependencies = [
-    "typer"
+    "pathspec>=0.12.1",
+    "typer",
 ]
 requires-python = ">= 3.9"
 keywords = ["cli", "files", "cleanup", "utility", "thanos"]
