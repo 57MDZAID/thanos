@@ -61,7 +61,6 @@ def calculate_file_weight(file: Path, weights_config: dict) -> float:
             pass
 
     # Return average of all applicable weights, or default if none match
-    print(f"{file=} {sum(weights) / len(weights) if weights else 0.5}")
     return sum(weights) / len(weights) if weights else 0.5
 
 
