@@ -1,6 +1,6 @@
 [project]
 name = "thanos-cli"
-version = "0.1.1"
+version = "0.2.0"
 description = "🫰 Thanos - Eliminate half of all files with a snap. Perfectly balanced, as all things should be."
 readme = "README.md"
 authors = [
@@ -27,13 +27,15 @@ classifiers = [
 ]
 license = { text = "MIT" }
 dependencies = [
-    "typer"
+    "pathspec>=0.12.1",
+    "typer",
 ]
 requires-python = ">= 3.9"
 keywords = ["cli", "files", "cleanup", "utility", "thanos"]
 
 [project.optional-dependencies]
 test = [
+    "pre-commit>=4.3.0",
     "coverage",
     "pytest",
     "ruff",

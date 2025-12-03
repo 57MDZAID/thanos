@@ -1,109 +1,30 @@
 """Console script for thanos_cli."""
 
-import random
+import json
+from pathlib import Path
 from typing import Annotated, Optional
 
 import typer
 from rich.console import Console
+from rich.panel import Panel
 
-from .utils import get_files
+from .snap import snap
 
 app = typer.Typer(
     name="thanos",
-    help="🫰 Thanos - Eliminate half of all files with a snap. Perfectly balanced, as all things should be.",
+    help="🫰 Thanos - Eliminate half of all files with a snap.",
     add_completion=False,
+    no_args_is_help=True,
 )
 console = Console()
 
 
-def snap(
-    directory: str = ".",
-    recursive: bool = False,
-    dry_run: bool = False,
-    seed: Optional[int] = None,
-):
-    """
-    The Snap - Eliminates half of all files randomly.
-
-    Args:
-        directory: Target directory (default: current directory)
-        recursive: Include subdirectories
-        dry_run: Show what would be deleted without actually deleting
-        seed: Random seed for reproducible file selection
-    """
-    print("🫰 Initiating the Snap...")
-
-    # Set random seed if provided for reproducible results
-    if seed is not None:
-        random.seed(seed)
-        print(f"🎲 Using random seed: {seed}")
-
-    files = get_files(directory, recursive)
-    total_files = len(files)
-
-    if total_files == 0:
-        print("No files found. The universe is empty.")
-        return
-
-    # Calculate how many files to eliminate
-    files_to_eliminate = total_files // 2
-
-    # Randomly select files for elimination
-    eliminated = random.sample(files, files_to_eliminate)
-
-    print("\n📊 Balance Assessment:")
-    print(f"   Total files: {total_files}")
-    print(f"   Files to eliminate: {files_to_eliminate}")
-    print(f"   Survivors: {total_files - files_to_eliminate}")
-
-    if dry_run:
-        print("\n🔍 DRY RUN - These files would be eliminated:")
-        for file in eliminated:
-            print(f"   💀 {file}")
-        print("\n⚠️  This was a dry run. No files were harmed.")
-        if seed is None:
-            print("💡 Tip: Use --seed <number> to get the same file selection on the next run.")
-        else:
-            print(f"💡 Run 'thanos --seed {seed}' to delete these exact files.")
-        return
-
-    # Show preview of files to be deleted
-    print("\n📋 Files selected for elimination:")
-    for file in eliminated:
-        print(f"   💀 {file}")
-
-    # Confirm before destruction
-    print("\n⚠️  WARNING: This will permanently delete the files listed above!")
-    confirm = input("Type 'snap' to proceed: ")
-
-    if confirm.lower() != "snap":
-        print("Snap cancelled. The universe remains unchanged.")
-        return
-
-    # Execute the snap
-    print("\n💥 Snapping...")
-    eliminated_count = 0
-
-    for file in eliminated:
-        try:
-            file.unlink()
-            eliminated_count += 1
-            print(f"   ✓ Eliminated: {file}")
-        except Exception as e:
-            print(f"   ❌ Failed to eliminate {file}: {e}")
-
-    print("\n✨ The snap is complete.")
-    print(f"   {eliminated_count} files eliminated.")
-    print("   Perfectly balanced, as all things should be.")
-
-
-@app.command()
-def main(
+@app.command(name="snap")
+def snap_command(
     directory: Annotated[
-        Optional[str],
+        str,
         typer.Argument(
-            help="Target directory to snap (default: current directory)",
-            show_default=False,
+            help="Target directory (default: current directory)",
         ),
     ] = ".",
     recursive: Annotated[
@@ -111,7 +32,7 @@ def main(
         typer.Option(
             "--recursive",
             "-r",
-            help="Include files in subdirectories recursively",
+            help="Include subdirectories",
         ),
     ] = False,
     dry_run: Annotated[
@@ -119,7 +40,7 @@ def main(
         typer.Option(
             "--dry-run",
             "-d",
-            help="Preview what would be deleted without actually deleting",
+            help="Preview without deleting",
         ),
     ] = False,
     seed: Annotated[
@@ -127,43 +48,138 @@ def main(
         typer.Option(
             "--seed",
             "-s",
-            help="Random seed for reproducible file selection (use same seed to get same files)",
+            help="Random seed for reproducibility",
         ),
     ] = None,
+    no_protect: Annotated[
+        bool,
+        typer.Option(
+            "--no-protect",
+            help="Disable all protections (DANGEROUS!)",
+        ),
+    ] = False,
 ):
     """
-    🫰 Eliminate half of all files in a directory with a snap.
-
-    Thanos randomly selects and deletes exactly half of the files in the specified
-    directory. Use with caution - deleted files cannot be recovered!
-
-    The file selection is random by default. Use --seed with the same number to get
-    the same selection across runs.
+    🫰 Eliminate half of all files with a snap.
 
     Examples:
 
-        # Preview with a random selection
-        $ thanos --dry-run
+      # Preview in current directory
+      thanos snap -d
 
-        # Preview with a specific seed (reproducible)
-        $ thanos --dry-run --seed 12345
+      # Snap specific directory
+      thanos snap test_env/ -d
 
-        # Delete using the same seed from dry run
-        $ thanos --seed 12345
-
-        # Snap a specific directory
-        $ thanos /path/to/directory --seed 999
-
-        # Include subdirectories with seed
-        $ thanos --recursive --seed 42
+      # Recursive with seed
+      thanos snap -r --seed 42
     """
     try:
-        snap(directory, recursive, dry_run, seed)
+        snap(directory, recursive, dry_run, seed, no_protect)
     except Exception as e:
-        print(f"❌ Error: {e}")
-        return 1
+        console.print(f"\n[bold red]❌ Error:[/bold red] {e}")
+        raise typer.Exit(1)  # noqa: B904
 
-    return 0
+
+@app.command()
+def init(
+    directory: Annotated[
+        str,
+        typer.Argument(
+            help="Directory to initialize (default: current)",
+        ),
+    ] = ".",
+):
+    """
+    📝 Create example .thanosignore and .thanosrc.json files.
+    """
+    base_path = Path(directory)
+
+    # Create .thanosignore
+    thanosignore_path = base_path / ".thanosignore"
+    if not thanosignore_path.exists():
+        thanosignore_content = """# Thanos Ignore File
+# Uses gitignore-style pattern matching
+# https://git-scm.com/docs/gitignore
+
+# Important directories (trailing slash matches directories)
+important/
+backup/
+docs/
+
+# Python
+venv/
+.venv/
+__pycache__/
+*.pyc
+
+# Node.js
+node_modules/
+
+# Database files
+*.db
+*.sqlite
+
+# Important data files (wildcards work like gitignore)
+*-important.*
+*-backup.*
+
+# Specific files
+secrets.json
+credentials.yaml
+
+# Thanos shouldn't snap himself
+.thanosignore
+.thanosrc.json
+"""
+        thanosignore_path.write_text(thanosignore_content)
+        console.print(f"[green]✓[/green] Created [bold]{thanosignore_path}[/bold]")
+    else:
+        console.print(f"[yellow]⚠️[/yellow]  {thanosignore_path} already exists")
+
+    # Create .thanosrc.json
+    thanosrc_path = base_path / ".thanosrc.json"
+    if not thanosrc_path.exists():
+        thanosrc_content = {
+            "weights": {
+                "by_extension": {
+                    ".log": 0.9,
+                    ".tmp": 0.95,
+                    ".cache": 0.95,
+                    ".bak": 0.8,
+                    ".old": 0.8,
+                    ".py": 0.3,
+                    ".js": 0.3,
+                    ".db": 0.1,
+                    ".json": 0.2,
+                }
+            }
+        }
+        thanosrc_path.write_text(json.dumps(thanosrc_content, indent=2))
+        console.print(f"[green]✓[/green] Created [bold]{thanosrc_path}[/bold]")
+    else:
+        console.print(f"[yellow]⚠️[/yellow]  {thanosrc_path} already exists")
+
+    console.print()
+    console.print(
+        Panel(
+            "[bold green]✨ Initialization complete![/bold green]\n\n"
+            "Edit these files to customize:\n"
+            f"  • [cyan]{thanosignore_path}[/cyan] - Uses gitignore-style patterns\n"
+            f"  • [cyan]{thanosrc_path}[/cyan] - Configure weighted selection\n\n"
+            "[dim]Run 'thanos snap -d' to test your configuration.[/dim]",
+            border_style="green",
+        )
+    )
+
+
+@app.callback(invoke_without_command=True)
+def default_callback(ctx: typer.Context):
+    """
+    Default behavior when no command is specified.
+    """
+    if ctx.invoked_subcommand is None:
+        # Show help by default
+        console.print(ctx.get_help())
 
 
 if __name__ == "__main__":
