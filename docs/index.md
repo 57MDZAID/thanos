@@ -3,4 +3,5 @@
 ## Contents
 
 - [Installation](installation.md)
-- [Usage](usage.md)
+- [Usage Guide](usage.md)
+- [Configuration](configuration.md)
