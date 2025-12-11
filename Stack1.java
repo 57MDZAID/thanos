@@ -162,16 +162,16 @@ public class Stack1{
         s.push(3);
         s.push(4);
         s.push(5);
-        //pushAtBottom(s,1);
-        //System.out.println(reverseString(str));
-        // reverseStack(s);
-        // System.out.println("----Reverse Stack----");
-        // printStack(s);
-        // int stock[]={100,80,60,70,60,85,100};
-        // stockSpan(stock);
-        // findNextGreater(arr);
-        // System.out.println(isValidParentheses(str));
-        //System.out.println(isDuplicate(str2));
+        pushAtBottom(s,1);
+        System.out.println(reverseString(str));
+        reverseStack(s);
+        System.out.println("----Reverse Stack----");
+        printStack(s);
+        int stock[]={100,80,60,70,60,85,100};
+        stockSpan(stock);
+        findNextGreater(arr);
+        System.out.println(isValidParentheses(str));
+        System.out.println(isDuplicate(str2));
         maxAreaInHistogram(arr);
     }
 }
